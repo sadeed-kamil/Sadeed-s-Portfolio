@@ -29,6 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 9. Back To Top
   initBackToTop();
+
+  // 10. Hire Me Modal & Backend Email Connection
+  initHireModal();
+
+  // 11. Ultra-Smooth Scroll Reveal System
+  initScrollReveal();
 });
 
 /* --------------------------------------------------------------------------
@@ -457,8 +463,114 @@ function initProjects() {
 }
 
 /* --------------------------------------------------------------------------
-   7. Client Project Contact Form System
+   7. Backend Email System & Inquiry Handler
    -------------------------------------------------------------------------- */
+const BACKEND_API_URL = 'http://localhost:5000/api/hire';
+
+async function handleInquirySubmission({ name, email, service, budget, message, source }, submitBtn, formElement, modalToClose) {
+  // Client-side Validation
+  if (!name || name.length < 2) {
+    showToast('Validation Error', 'Please enter your full name', 'error');
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    showToast('Validation Error', 'Please enter a valid email address', 'error');
+    return;
+  }
+
+  if (!message || message.length < 6) {
+    showToast('Validation Error', 'Please provide a brief description of your project', 'error');
+    return;
+  }
+
+  // Set loading state
+  const originalBtnContent = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = `
+    <svg class="spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 0.8s linear infinite;">
+      <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"></circle>
+    </svg>
+    <span>Sending to Sadeed...</span>
+  `;
+
+  const payload = {
+    name,
+    email,
+    service: service || 'Web Development',
+    budget: budget || 'Undisclosed',
+    message,
+    source: source || 'Portfolio Contact Form',
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    // 1. Attempt to send to local/production Express backend
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+    const response = await fetch(BACKEND_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      formElement.reset();
+      if (modalToClose) {
+        modalToClose.classList.remove('open');
+      }
+      showToast(
+        'Email Dispatched! 🚀',
+        `Thank you ${name}. Your project details were successfully sent to Sadeed Kamil. Expect a reply within 24 hours.`,
+        'success'
+      );
+      return;
+    } else {
+      throw new Error(`Server returned status ${response.status}`);
+    }
+  } catch (err) {
+    console.warn('Backend server not currently active on localhost:5000. Activating direct mail client dispatch...', err);
+
+    // Fallback: Reset form, close modal, and provide direct mail draft to sadeedkamil143@gmail.com
+    formElement.reset();
+    if (modalToClose) {
+      modalToClose.classList.remove('open');
+    }
+
+    const mailtoSubject = encodeURIComponent(`Project Inquiry: ${service} from ${name}`);
+    const mailtoBody = encodeURIComponent(
+      `Hi Sadeed,\n\nI would like to hire you for a project:\n\n` +
+      `Name: ${name}\n` +
+      `Email: ${email}\n` +
+      `Service: ${service}\n` +
+      `Budget: ${budget}\n\n` +
+      `Project Details:\n${message}\n\n` +
+      `Best regards,\n${name}`
+    );
+
+    // Open mail client draft so the inquiry is 100% reachable
+    const mailtoUrl = `mailto:sadeedkamil143@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+    window.open(mailtoUrl, '_blank');
+
+    showToast(
+      'Inquiry Prepared! ✉️',
+      `Thank you ${name}! Direct email draft to sadeedkamil143@gmail.com has been opened. (Tip: Start the backend server with 'npm start' in the backend/ directory for automated email dispatch!)`,
+      'success'
+    );
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalBtnContent;
+  }
+}
+
 function initClientContactForm() {
   const contactForm = document.getElementById('client-contact-form');
   if (!contactForm) return;
@@ -473,45 +585,14 @@ function initClientContactForm() {
     const message = document.getElementById('client-message').value.trim();
     const submitBtn = document.getElementById('contact-submit-btn');
 
-    // Validation
-    if (!name || name.length < 2) {
-      showToast('Validation Error', 'Please enter your full name', 'error');
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      showToast('Validation Error', 'Please enter a valid email address', 'error');
-      return;
-    }
-
-    if (!message || message.length < 8) {
-      showToast('Validation Error', 'Please provide a brief description of your project', 'error');
-      return;
-    }
-
-    // Button loading state
-    const originalBtnContent = submitBtn.innerHTML;
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = `
-      <svg class="spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
-        <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"></circle>
-      </svg>
-      Sending Inquiry...
-    `;
-
-    // Simulate sending inquiry
-    setTimeout(() => {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnContent;
-      contactForm.reset();
-
-      showToast(
-        'Inquiry Sent Successfully! 🚀',
-        `Thank you ${name}. I will review your project (${service || 'Web Development'}) and reply within 24 hours.`,
-        'success'
-      );
-    }, 1200);
+    handleInquirySubmission({
+      name,
+      email,
+      service,
+      budget,
+      message,
+      source: 'On-Page Contact Form'
+    }, submitBtn, contactForm, null);
   });
 }
 
@@ -707,7 +788,7 @@ function showToast(title, message, type = 'info') {
     toastIcon.style.color = 'var(--accent-pink)';
   } else {
     toastIcon.innerHTML = 'ℹ';
-    toastIcon.style.color = 'var(--accent-cyan)';
+    toastIcon.style.color = 'var(--accent-yellow)';
   }
 
   toast.classList.add('show');
@@ -734,4 +815,125 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+/* --------------------------------------------------------------------------
+   10. Dedicated 'Hire Me' Modal System
+   -------------------------------------------------------------------------- */
+function initHireModal() {
+  const hireModal = document.getElementById('hire-modal');
+  const closeBtn = document.getElementById('hire-modal-close-btn');
+  const hireForm = document.getElementById('hire-modal-form');
+  const navHireBtn = document.getElementById('nav-contact-cta');
+  const footerHireLink = document.getElementById('footer-hire-link');
+  const heroHireBtn = document.getElementById('hero-cta-hire');
+
+  if (!hireModal) return;
+
+  function openHireModal(e) {
+    if (e) e.preventDefault();
+    hireModal.classList.add('open');
+    hireModal.setAttribute('aria-hidden', 'false');
+
+    // Fire-and-forget ping to backend when client clicks Hire Me
+    try {
+      fetch('http://localhost:5000/api/hire-ping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timestamp: new Date().toISOString(),
+          trigger: e && e.target ? (e.target.id || e.target.textContent || 'Hire CTA') : 'Direct Click'
+        })
+      }).catch(() => {});
+    } catch (_) {}
+
+    const firstInput = document.getElementById('hire-name');
+    if (firstInput) {
+      setTimeout(() => firstInput.focus(), 150);
+    }
+  }
+
+  function closeHireModal() {
+    hireModal.classList.remove('open');
+    hireModal.setAttribute('aria-hidden', 'true');
+  }
+
+  // Trigger buttons
+  if (navHireBtn) navHireBtn.addEventListener('click', openHireModal);
+  if (footerHireLink) footerHireLink.addEventListener('click', openHireModal);
+  if (heroHireBtn) heroHireBtn.addEventListener('click', openHireModal);
+
+  // Close handlers
+  if (closeBtn) closeBtn.addEventListener('click', closeHireModal);
+
+  hireModal.addEventListener('click', (e) => {
+    if (e.target === hireModal) {
+      closeHireModal();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && hireModal.classList.contains('open')) {
+      closeHireModal();
+    }
+  });
+
+  // Hire Form Submission
+  if (hireForm) {
+    hireForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('hire-name').value.trim();
+      const email = document.getElementById('hire-email').value.trim();
+      const service = document.getElementById('hire-service').value;
+      const budget = document.getElementById('hire-budget').value;
+      const message = document.getElementById('hire-message').value.trim();
+      const submitBtn = document.getElementById('hire-modal-submit-btn');
+
+      handleInquirySubmission({
+        name,
+        email,
+        service,
+        budget,
+        message,
+        source: 'Hire Me Modal'
+      }, submitBtn, hireForm, hireModal);
+    });
+  }
+}
+
+/* --------------------------------------------------------------------------
+   11. Ultra-Smooth Scroll Reveal System
+   -------------------------------------------------------------------------- */
+function initScrollReveal() {
+  if (!('IntersectionObserver' in window)) return;
+
+  const revealElements = document.querySelectorAll(
+    '.section-header, .stat-card, .about-text, .hero-card, .skill-card, .timeline-item, .project-card, .review-card, .contact-info-card, .client-form-card'
+  );
+
+  revealElements.forEach((el, index) => {
+    el.classList.add('reveal');
+    // Stagger items slightly for dynamic waterfall effect
+    if (index % 4 === 1) el.style.transitionDelay = '0.08s';
+    if (index % 4 === 2) el.style.transitionDelay = '0.16s';
+    if (index % 4 === 3) el.style.transitionDelay = '0.24s';
+  });
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.1,
+      rootMargin: '0px 0px -30px 0px'
+    }
+  );
+
+  revealElements.forEach((el) => observer.observe(el));
 }

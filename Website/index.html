@@ -172,7 +172,7 @@
         <div class="hero-image-wrapper">
           <div class="hero-image-backdrop"></div>
           <div class="hero-card">
-            <img src="assets/IMG_2117.JPG"
+            <img src="../IMG_2117.JPG"
               onerror="this.onerror=null; this.src='file:///C:/Users/AL-M%20U%20%21%20Z%20Z/.gemini/antigravity-ide/brain/fc4fef92-a3b7-4fa3-88e1-3dd4ee630c4e/profile_portrait_1789049927913.jpg';"
               alt="Sadeed Kamil - Web Developer" class="hero-avatar-img" id="hero-profile-img">
 
@@ -1060,7 +1060,86 @@
   </div>
 
   <!-- ========================================================================
-       FLOATING TOAST NOTIFICATION
+       DEDICATED "HIRE ME" MODAL
+       ======================================================================== -->
+  <div class="modal-backdrop" id="hire-modal" aria-hidden="true">
+    <div class="hire-modal-box">
+      <button class="modal-close-btn" id="hire-modal-close-btn" aria-label="Close Modal">&times;</button>
+      
+      <div class="hire-modal-header">
+        <div class="hire-modal-badge">
+          <span>⚡ Available for Hire & Projects</span>
+        </div>
+        <h3 class="hire-modal-title">Hire Sadeed Kamil</h3>
+        <p class="hire-modal-subtitle">
+          Have an idea or need a dedicated frontend / full-stack developer? Fill in the details below and an email will be sent immediately to my inbox.
+        </p>
+      </div>
+
+      <form id="hire-modal-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="hire-name" class="form-label">Your Name *</label>
+            <input type="text" id="hire-name" class="form-control" placeholder="e.g. Alex Morgan" required>
+          </div>
+
+          <div class="form-group">
+            <label for="hire-email" class="form-label">Email Address *</label>
+            <input type="email" id="hire-email" class="form-control" placeholder="e.g. alex@example.com" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="hire-service" class="form-label">Service Needed</label>
+            <select id="hire-service" class="form-control">
+              <option value="Full Website Development">Full Website Development</option>
+              <option value="Frontend UI Implementation">Frontend UI Implementation</option>
+              <option value="UI/UX Redesign & Overhaul">UI/UX Redesign & Overhaul</option>
+              <option value="Bug Fixing & Optimization">Bug Fixing & Optimization</option>
+              <option value="Consultation / Freelance Contract">Consultation / Freelance Contract</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="hire-budget" class="form-label">Estimated Budget</label>
+            <select id="hire-budget" class="form-control">
+              <option value="Under $300">Under $300</option>
+              <option value="$300 - $800" selected>$300 – $800</option>
+              <option value="$800 - $2,000">$800 – $2,000</option>
+              <option value="$2,000+">$2,000+</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="hire-message" class="form-label">Project Overview / Timeline *</label>
+          <textarea id="hire-message" class="form-control" placeholder="Tell me about what you'd like built, timeline, key features..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" id="hire-modal-submit-btn">
+          <span>Send Instant Hire Request</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </form>
+
+      <div class="hire-quick-channels">
+        <span>Prefer direct messaging?</span>
+        <div class="hire-channel-links">
+          <a href="mailto:sadeedkamil143@gmail.com" class="hire-channel-link">
+            ✉️ Direct Email
+          </a>
+          <a href="https://wa.me/923489696717" target="_blank" rel="noopener noreferrer" class="hire-channel-link">
+            💬 WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
        ======================================================================== -->
   <div class="toast-notification" id="toast-notification" role="alert" aria-live="assertive">
     <div class="toast-icon" id="toast-icon">✓</div>
@@ -1102,10 +1181,10 @@
         <div>
           <h4 class="footer-links-title">Client & Contact</h4>
           <ul class="footer-links-list">
-            <li><a href="#contact">Hire Me</a></li>
+            <li><a href="#contact" id="footer-hire-link">Hire Me</a></li>
             <li><a href="#reviews">Client Reviews</a></li>
-            <li><a href="mailto:sadeedkamil.dev@gmail.com">sadeedkamil.dev@gmail.com</a></li>
-            <li><a href="https://wa.me/923001234567" target="_blank">WhatsApp Direct</a></li>
+            <li><a href="mailto:sadeedkamil143@gmail.com">sadeedkamil143@gmail.com</a></li>
+            <li><a href="https://wa.me/923489696717" target="_blank">WhatsApp Direct</a></li>
           </ul>
         </div>
       </div>
